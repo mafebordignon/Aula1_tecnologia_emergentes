@@ -8,7 +8,15 @@ export const showUser = async (req, res, next) => {
 
         res
             .status(httpStatus.OK)
-            .json(user);
+            .json({
+                ...user._doc,
+                _links: [
+                    { rel: "self", href: req.originalUrl , method: req.method, },
+                    { rel: "list", href: req.baseUrl , method: "GET", },
+                    { rel: "update", href: `${req.baseUrl}$/{req.params._id}` , method: "PUT", },
+                    { rel: "delete", href: `${req.baseUrl}$/{req.params._id}` , method: "DELETE", },
+                ]
+            });
     } catch (err) {
         res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
@@ -18,11 +26,22 @@ export const showUser = async (req, res, next) => {
 
 export const listUser = async (req, res, next) => {
     try {
-        const user = await User.find({});
+        const users = await User.find();
 
         res
             .status(httpStatus.OK)
-            .json(users);
+            .json({
+                users: users.map((user) => ({
+                    ...user._doc,
+                    _links: [
+                        { rel: "self", href: `${re.baseUrl}/${user._id}` , method: req.method, },
+                    ]
+                })),
+                _links: [
+                    { rel: "self", href: req.baseUrl , method: req.method, },
+                    { rel: "create", href: req.baseUrl, method: "POST", },
+                ],
+            });
     } catch (err) {
         res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
@@ -50,7 +69,15 @@ export const editUser = async (req, res, next) => {
 
         res
             .status(httpStatus.CREATED)
-            .json(user);
+            .json({
+                ...user._doc,
+                _links: [
+                    { rel: "self", href: req.originalUrl , method: req.method, },
+                    { rel: "list", href: req.baseUrl , method: "GET", },
+                    { rel: "update", href: `${req.baseUrl}$/{req.params._id}` , method: "PUT", },
+                    { rel: "delete", href: `${req.baseUrl}$/{req.params._id}` , method: "DELETE", },
+                ],
+            });
     } catch (err) {
         res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
