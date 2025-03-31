@@ -1,68 +1,78 @@
-import { userInfo } from "node:os";
 import User from "../models/userModel.js";
-import httpStatus from "http-status";
 
 export const showUser = async (req, res, next) => {
-    try {
-        const user = await User.findOne(req.params); 
+  try {
+    const user = await User.findOne(req.params);
 
-        res
-            .status(httpStatus.OK)
-            .json({
-                ...user._doc,
-                _links: [
-                    { rel: "self", href: req.originalUrl , method: req.method, },
-                    { rel: "list", href: req.baseUrl , method: "GET", },
-                    { rel: "update", href: `${req.baseUrl}$/{req.params._id}` , method: "PUT", },
-                    { rel: "delete", href: `${req.baseUrl}$/{req.params._id}` , method: "DELETE", },
-                ]
-            });
-    } catch (err) {
-        next(err);
-    }
+    res.hateoas_item(user);
+  } catch (err) {
+    next(err);
+  }
 }
 
-export const listUser = async (req, res, next) => {
-    try {
-        const users = await User.find();
+export const listUsers = async (req, res, next) => {
+  try {
+    const { _page, _size, _order, ...filter } = req.query;
+    const page = parseInt(_page) || 1;
+    const size = parseInt(_size) || 10;
 
-        res.hateos_list(users);
-    } catch (err) {
-        next(err);
-    }
+    const offset = (page - 1) * size;
+
+    const users = await User
+      .find(filter)
+      .skip(offset)
+      .limit(size)
+      .sort(_order);
+
+    const totalData = await User.countDocuments();
+    const totalPages = Math.ceil(totalData / size);
+
+    res.hateoas_list(users, totalPages);
+  } catch (err) {
+    next(err);
+  }
 }
 
 export const createUser = async (req, res, next) => {
-    try {
-        await new User(req.body).save();
+  try {
+    const { name, email, password } = req.body;
 
-        res
-            .status(httpStatus.CREATED)
-            .send();
-    } catch (err) {
-        next(err);
-    }
+    await new User({
+      name,
+      email,
+      password,
+    }).save();
+
+    res.created();
+  } catch (err) {
+    next(err);
+  }
 }
 
 export const editUser = async (req, res, next) => {
-    try {
-        user = await User.findOneAndUpdate(req.params, req.body, { new: true });
+  try {
+    const { name, email, password } = req.body;
 
-        res.hateos_item(user);
-    } catch (err) {
-        next(err);
-    }
+    const user = await User.findOneAndUpdate(req.params, {
+      name,
+      email,
+      password,
+    }, {
+      new: true,
+    });
+
+    res.hateoas_item(user);
+  } catch (err) {
+    next(err);
+  }
 }
+
 export const deleteUser = async (req, res, next) => {
-    try {
-        await User.findOneAndDelete(req.params._id);
+  try {
+    await User.findByIdAndDelete(req.params._id);
 
-        res
-            .status(httpStatus.CREATED)
-            .send();
-    } catch (err) {
-        next(err);
-    }
+    res.no_content();
+  } catch (err) {
+    next(err);
+  }
 }
-
-//toda regra de négocios
