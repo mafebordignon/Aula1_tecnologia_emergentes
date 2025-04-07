@@ -1,0 +1,17 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Tecnologias Emergentes",
+    "description": "Documentação da API criada em sala"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4040/"
+    }
+  ],
+  "paths": {},
+  "components": {
+    "schemas": {}
+  }
+}
