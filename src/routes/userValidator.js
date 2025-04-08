@@ -1,21 +1,20 @@
-import { Router } from "express";
+import yup from "yup";
 
-import {
-  listUsers,
-  showUser,
-  createUser,
-  editUser,
-  deleteUser,
-} from "../controllers/userController.js";
-
-import validator from "../middlewares/validator.js";
-import schema from "./userValidator.js";
-
-const router = Router();
-router.get("/", listUsers);
-router.get("/:_id", showUser);
-router.post("/", validator(schema), createUser);
-router.put("/:_id", validator(schema), editUser);
-router.delete("/:_id", deleteUser);
-
-export default router;
+export default yup
+  .object()
+  .shape({
+    name: yup
+      .string()
+      .min(2, "Too short (name)")
+      .max(80, "Too long (name)")
+      .required("Required (name)"),
+    email: yup
+      .string()
+      .email("Invalid (email)")
+      .required("Required (email)"),
+    password: yup
+      .string()
+      .min(8, "Too short (password)")
+      .max(20, "Too long (password)")
+      .required("Required (password)"),
+  });

@@ -22,10 +22,9 @@ export default (req, res, next) => {
   res.internal_server_error = (err) => {
     /*
     #swagger.responses[500] = {
-      schema: ( $ref: "#/definitions/InternalServerError")
+      schema: { $ref: "#/definitions/InternalServerError"}
     }
     */
-    
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
       .json(err);
@@ -41,6 +40,12 @@ export default (req, res, next) => {
     res
       .status(httpStatus.PAYMENT_REQUIRED)
       .json(err);
+  }
+
+  res.unauthorized = () => {
+    res
+    .status(httpStatus.UNAUTHORIZED)
+    .send();
   }
 
   next();
